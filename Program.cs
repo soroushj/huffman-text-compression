@@ -39,7 +39,7 @@ try
 }
 catch (EncoderFallbackException)
 {
-    // a corrupted file can decode to text that is not valid Unicode
+    // A corrupted file can decode to text that is not valid Unicode
     Console.Error.WriteLine($"Error: File '{input}' is invalid or corrupted.");
     return 1;
 }

@@ -11,10 +11,10 @@ class HuffmanCodeTable
     {
         CodeTable = new HuffmanCode[0xFFFF + 1];
 
-        // if the text entirely consists of a single character
+        // If the text consists entirely of a single character
         if (tree.IsLeaf())
         {
-            // use code 0 for the character
+            // Use code 0 for the character
             CodeTable[tree.Character] = new HuffmanCode(0, 1);
             _NumberOfCodes = 1;
             return;
@@ -28,7 +28,7 @@ class HuffmanCodeTable
     {
         if (tree.IsLeaf())
         {
-            // known limitation: codes are stored in 16 bits, so texts with very uneven character
+            // Known limitation: codes are stored in 16 bits, so texts with very uneven character
             // frequencies (which produce longer codes) cannot be compressed
             if (codeLength > HuffmanCode.MaxLength)
             {
@@ -40,9 +40,9 @@ class HuffmanCodeTable
             return;
         }
 
-        // put a 0 bit and go left
+        // Put a 0 bit and go left
         GetAllHuffmanCodes(tree.Left, (ushort)(code << 1), (byte)(codeLength + 1));
-        // put a 1 bit and go right
+        // Put a 1 bit and go right
         GetAllHuffmanCodes(tree.Right, (ushort)((code << 1) | 1), (byte)(codeLength + 1));
     }
 

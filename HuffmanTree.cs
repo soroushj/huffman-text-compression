@@ -38,7 +38,7 @@ class HuffmanTree
     [MemberNotNullWhen(false, nameof(Left), nameof(Right))]
     public bool IsLeaf()
     {
-        // in a HuffmanTree, Right == null if and only if Left == null
+        // In a HuffmanTree, Right == null if and only if Left == null
         return Left == null;
     }
 
