@@ -1,6 +1,9 @@
 using System.Text;
 using HuffmanTextCompression;
 
+// Known limitation: input files are read as UTF-8 text and output files are written as UTF-8 without BOM,
+// so a BOM or invalid UTF-8 bytes in the original file are not preserved by a compress/decompress round-trip
+
 const string usage = """
     Usage:
       HuffmanTextCompression compress <input> <output>
