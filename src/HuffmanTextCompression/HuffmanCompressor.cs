@@ -287,9 +287,9 @@ public static class HuffmanCompressor
 
             // The length of the Huffman code is 1, so the number of characters equals the number of bits of the encoded
             // text
-            int numOfChars = (buffer.Length - textStart - 1) * 8 + bitsOfLastByteOfText;
+            int charCount = (buffer.Length - textStart - 1) * 8 + bitsOfLastByteOfText;
 
-            string singleCharText = new(tree.Character, numOfChars);
+            string singleCharText = new(tree.Character, charCount);
             output.Write(singleCharText);
             return new CompressionInfo(singleCharText.Length, Encoding.UTF8.GetByteCount(singleCharText), MetadataSize, treeSize, buffer.Length - textStart);
         }
@@ -411,7 +411,7 @@ public static class HuffmanCompressor
 
 // All sizes are in bytes. UncompressedSize is the size of the text in UTF-8 (without BOM), which is the baseline for
 // CompressionRatio.
-public readonly record struct CompressionInfo(int TotalChars, int UncompressedSize, int MetadataSize, int EncodedTreeSize, int EncodedTextSize)
+public readonly record struct CompressionInfo(int CharCount, int UncompressedSize, int MetadataSize, int EncodedTreeSize, int EncodedTextSize)
 {
     public int CompressedSize => MetadataSize + EncodedTreeSize + EncodedTextSize;
 
@@ -423,7 +423,7 @@ public readonly record struct CompressionInfo(int TotalChars, int UncompressedSi
         string ratio = double.IsNaN(CompressionRatio) ? "n/a" : $"{CompressionRatio:0.00}";
 
         return string.Join(Environment.NewLine,
-            $"Characters:        {TotalChars:n0}",
+            $"Characters:        {CharCount:n0}",
             $"Uncompressed size: {FormatSize(UncompressedSize)}",
             $"Compressed size:   {FormatSize(CompressedSize)} (metadata: {MetadataSize:n0}, tree: {EncodedTreeSize:n0}, text: {EncodedTextSize:n0})",
             $"Compression ratio: {ratio}");

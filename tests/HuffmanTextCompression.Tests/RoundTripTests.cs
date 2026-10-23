@@ -13,7 +13,7 @@ public class RoundTripTests
 
         Assert.Equal(text, decodedText);
         Assert.Equal(encodeInfo, decodeInfo);
-        Assert.Equal(text.Length, encodeInfo.TotalChars);
+        Assert.Equal(text.Length, encodeInfo.CharCount);
         Assert.Equal(Encoding.UTF8.GetByteCount(text), encodeInfo.UncompressedSize);
         Assert.Equal(data.Length, encodeInfo.CompressedSize);
     }
