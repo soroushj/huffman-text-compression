@@ -7,6 +7,8 @@ static class HuffmanCompressor
     public static readonly int FileFormatVersion = 0;
 
     // encodes `text` and writes to `filename`, returns compression info
+    // known limitation: the text (not its original bytes) is compressed, so when it is read from a file,
+    // the file's encoding details (e.g. a UTF-8 BOM or invalid UTF-8 bytes) are not preserved by a round-trip
     public static CompressionInfo Encode(string text, string filename)
     {
         if (text.Length == 0)
