@@ -78,13 +78,13 @@ public class RoundTripTests
         AssertRoundTrip(RandomText(length, length, random => random.Next(2) == 0 ? 'a' : 'b'));
     }
 
-    public static TheoryData<int> Lengths => new(Enumerable.Range(1, 40).Append(100_000));
+    public static TheoryData<int> Lengths => [.. Enumerable.Range(1, 40), 100_000];
 
     // Every possible char once: produces the largest possible tree, with all codes exactly 16 bits long
     [Fact]
     public void AllChars()
     {
-        string text = new(Enumerable.Range(0, char.MaxValue + 1).Select(i => (char)i).ToArray());
+        string text = new([.. Enumerable.Range(0, char.MaxValue + 1).Select(i => (char)i)]);
 
         AssertRoundTrip(text);
         Assert.Equal(147_456, Encode(text).Info.EncodedTreeSize);

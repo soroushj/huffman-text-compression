@@ -36,6 +36,9 @@ public static class HuffmanCompressor
     // info
     public static CompressionInfo Encode(TextReader input, Stream output)
     {
+        ArgumentNullException.ThrowIfNull(input);
+        ArgumentNullException.ThrowIfNull(output);
+
         // The whole text is needed up front, to count the character frequencies
         string text = input.ReadToEnd();
 
@@ -218,6 +221,9 @@ public static class HuffmanCompressor
     // info
     public static CompressionInfo Decode(Stream input, TextWriter output)
     {
+        ArgumentNullException.ThrowIfNull(input);
+        ArgumentNullException.ThrowIfNull(output);
+
         using MemoryStream memory = new();
         input.CopyTo(memory);
         byte[] buffer = memory.ToArray();

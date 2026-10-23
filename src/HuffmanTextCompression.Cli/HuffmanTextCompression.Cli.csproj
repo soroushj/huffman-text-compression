@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HuffmanTextCompression\HuffmanTextCompression.csproj" />
+    <ProjectReference Include="../HuffmanTextCompression/HuffmanTextCompression.csproj" />
   </ItemGroup>
 
 </Project>

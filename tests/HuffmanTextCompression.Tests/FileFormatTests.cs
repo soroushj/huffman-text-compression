@@ -6,7 +6,7 @@ namespace HuffmanTextCompression.Tests;
 // and Decode would still pass the round-trip tests)
 public class FileFormatTests
 {
-    public static TheoryData<string> FileNames => new("breathe.txt", "single-char.txt", "unicode.txt", "license.txt");
+    public static TheoryData<string> FileNames => ["breathe.txt", "single-char.txt", "unicode.txt", "license.txt"];
 
     [Theory]
     [MemberData(nameof(FileNames))]

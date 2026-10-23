@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HuffmanTextCompression.Cli/HuffmanTextCompression.Cli.csproj" />
+    <Project Path="src/HuffmanTextCompression/HuffmanTextCompression.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/HuffmanTextCompression.Tests/HuffmanTextCompression.Tests.csproj" />
+  </Folder>
+</Solution>

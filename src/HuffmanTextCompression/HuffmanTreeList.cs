@@ -10,15 +10,10 @@ namespace HuffmanTextCompression;
 // and identical texts would no longer be guaranteed to compress to identical files (which FileFormatTests relies on).
 class HuffmanTreeList
 {
-    private class ListNode
+    private class ListNode(HuffmanTree tree)
     {
-        public HuffmanTree Tree;
+        public HuffmanTree Tree = tree;
         public ListNode? Next;
-
-        public ListNode(HuffmanTree tree)
-        {
-            Tree = tree;
-        }
     }
 
     // Both are null if and only if the list is empty. The last node is tracked so that adding a tree with the maximum

@@ -8,7 +8,7 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 4
 
-[*.{csproj,json,md}]
+[*.{csproj,props,slnx,json,md}]
 indent_size = 2
 
 [*.cs]
