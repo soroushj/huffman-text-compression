@@ -16,16 +16,20 @@ class HuffmanTreeList
         }
     }
 
+    // Both are null if and only if the list is empty. The last node is tracked so that adding a tree with the maximum
+    // frequency (common while building a Huffman tree) takes constant time.
     private ListNode? _first;
+    private ListNode? _last;
 
     // Adds the tree to the list such that the list remains sorted by the frequency of its trees
     public void Add(HuffmanTree tree)
     {
         ListNode newNode = new(tree);
 
-        if (_first == null)
+        if (_first == null || _last == null)
         {
             _first = newNode;
+            _last = newNode;
         }
         else if (tree.Frequency < _first.Tree.Frequency)
         {
@@ -33,11 +37,16 @@ class HuffmanTreeList
             newNode.Next = _first;
             _first = newNode;
         }
+        else if (tree.Frequency >= _last.Tree.Frequency)
+        {
+            // Maximum frequency: add newNode at the bottom of the list
+            _last.Next = newNode;
+            _last = newNode;
+        }
         else
         {
-            ListNode curNode;
-
-            for (curNode = _first; curNode.Next != null; curNode = curNode.Next)
+            // Add newNode before the first node with a higher frequency (which exists, since _last has one)
+            for (ListNode curNode = _first; curNode.Next != null; curNode = curNode.Next)
             {
                 if (tree.Frequency < curNode.Next.Tree.Frequency)
                 {
@@ -46,13 +55,6 @@ class HuffmanTreeList
                     curNode.Next = newNode;
                     break;
                 }
-            }
-
-            // If newNode was not added to the list (maximum frequency)
-            if (newNode.Next == null)
-            {
-                // Add newNode at the bottom of the list (curNode is now the last node)
-                curNode.Next = newNode;
             }
         }
     }
@@ -66,6 +68,12 @@ class HuffmanTreeList
 
         HuffmanTree top = _first.Tree;
         _first = _first.Next;
+
+        if (_first == null)
+        {
+            _last = null;
+        }
+
         return top;
     }
 

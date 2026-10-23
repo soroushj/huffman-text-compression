@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D812E096-17F8-4F92-A9B6-1C3F4488187D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HuffmanTextCompression", "src\HuffmanTextCompression\HuffmanTextCompression.csproj", "{BB378BEE-2546-4673-8279-82EBEA21E395}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HuffmanTextCompression.Cli", "src\HuffmanTextCompression.Cli\HuffmanTextCompression.Cli.csproj", "{2E0C1C8D-238C-4E65-99E7-6F9C102F500E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{EF0FAF42-7061-4503-A513-95EA0603DFBA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HuffmanTextCompression.Tests", "tests\HuffmanTextCompression.Tests\HuffmanTextCompression.Tests.csproj", "{8CC19BEA-3444-4067-9CDB-C39C4441B005}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BB378BEE-2546-4673-8279-82EBEA21E395}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB378BEE-2546-4673-8279-82EBEA21E395}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB378BEE-2546-4673-8279-82EBEA21E395}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB378BEE-2546-4673-8279-82EBEA21E395}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E0C1C8D-238C-4E65-99E7-6F9C102F500E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E0C1C8D-238C-4E65-99E7-6F9C102F500E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E0C1C8D-238C-4E65-99E7-6F9C102F500E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E0C1C8D-238C-4E65-99E7-6F9C102F500E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CC19BEA-3444-4067-9CDB-C39C4441B005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CC19BEA-3444-4067-9CDB-C39C4441B005}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CC19BEA-3444-4067-9CDB-C39C4441B005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CC19BEA-3444-4067-9CDB-C39C4441B005}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BB378BEE-2546-4673-8279-82EBEA21E395} = {D812E096-17F8-4F92-A9B6-1C3F4488187D}
+		{2E0C1C8D-238C-4E65-99E7-6F9C102F500E} = {D812E096-17F8-4F92-A9B6-1C3F4488187D}
+		{8CC19BEA-3444-4067-9CDB-C39C4441B005} = {EF0FAF42-7061-4503-A513-95EA0603DFBA}
+	EndGlobalSection
+EndGlobal

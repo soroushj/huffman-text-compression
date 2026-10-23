@@ -6,13 +6,25 @@ I wrote this project for an undergraduate data structures course. It is not mean
 
 ## Build and Run
 
-Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download) (Windows, macOS, or Linux). No other dependencies.
+Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download) (Windows, macOS, or Linux). The library and the CLI have no other dependencies; the tests use [xUnit](https://xunit.net), which is downloaded automatically.
+
+The library is in `src/HuffmanTextCompression`, the CLI in `src/HuffmanTextCompression.Cli`, and the tests in `tests/HuffmanTextCompression.Tests`. From the repository root:
 
 ```sh
-dotnet build                                 # build
-dotnet run -- compress LICENSE LICENSE.huff  # build and run
-dotnet publish -c Release -o out             # publish to out/, then run out/huff
-dotnet format                                # format the source code
+# Build everything
+dotnet build
+
+# Run the tests
+dotnet test
+
+# Build and run the CLI
+dotnet run --project src/HuffmanTextCompression.Cli -- compress LICENSE LICENSE.huff
+
+# Publish the CLI to out/, then run out/huff
+dotnet publish src/HuffmanTextCompression.Cli -c Release -o out
+
+# Format the source code
+dotnet format
 ```
 
 ## CLI Usage
@@ -43,6 +55,8 @@ Compression ratio: 1.30
 The exit code is `0` on success, `1` on errors (e.g. a missing or invalid file), and `2` on invalid arguments.
 
 ## API Usage
+
+To use the library in another project, reference it with `dotnet add reference <path>/src/HuffmanTextCompression`.
 
 `Encode` reads text from a `TextReader` and writes the compressed data to a `Stream`; `Decode` does the reverse. Both return the compression info. Any reader, writer, or stream works (e.g. a `StreamReader`, `StringWriter`, or `FileStream`), and neither method closes them.
 

@@ -14,7 +14,7 @@ namespace HuffmanTextCompression;
 //
 // Decoding reads the tree back from the file (see DecodeTree), then walks it from the root, bit by bit, emitting a
 // character at each leaf. Characters are UTF-16 code units (C# chars), so there are at most 65,536 of them.
-static class HuffmanCompressor
+public static class HuffmanCompressor
 {
     public const int FileFormatVersion = 0;
 
@@ -411,7 +411,7 @@ static class HuffmanCompressor
 
 // All sizes are in bytes. UncompressedSize is the size of the text in UTF-8 (without BOM), which is the baseline for
 // CompressionRatio.
-readonly record struct CompressionInfo(int TotalChars, int UncompressedSize, int MetadataSize, int EncodedTreeSize, int EncodedTextSize)
+public readonly record struct CompressionInfo(int TotalChars, int UncompressedSize, int MetadataSize, int EncodedTreeSize, int EncodedTextSize)
 {
     public int CompressedSize => MetadataSize + EncodedTreeSize + EncodedTextSize;
 
