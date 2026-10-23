@@ -6,7 +6,7 @@ I wrote this project for an undergraduate data structures course. It is not mean
 
 ## Build and Run
 
-Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download) (Windows, macOS, or Linux). The library and the CLI have no other dependencies; the tests use [xUnit](https://xunit.net), which is downloaded automatically.
+Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download) (Windows, macOS, or Linux).
 
 The library is in `src/HuffmanTextCompression`, the CLI in `src/HuffmanTextCompression.Cli`, and the tests in `tests/HuffmanTextCompression.Tests`. From the repository root:
 
