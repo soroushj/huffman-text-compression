@@ -18,20 +18,19 @@ dotnet format                                  # format the source code
 ## CLI Usage
 
 ```
-HuffmanTextCompression compress <input> <output>
-HuffmanTextCompression decompress <input> <output>
+HuffmanTextCompression compress <input> <output>    Compress a UTF-8 text file
+HuffmanTextCompression decompress <input> <output>  Decompress a compressed file
 ```
 
-`compress` reads a UTF-8 text file and writes the compressed file; `decompress` does the reverse. Both print size info:
+Both commands print the sizes and the compression ratio (uncompressed size / compressed size):
 
 ```
 $ HuffmanTextCompression compress LICENSE LICENSE.huf
-1,081 char(s) total
-829 byte(s) total
-4 byte(s) for metadata
-131 byte(s) for tree
-694 byte(s) for text
-1,081 -> 829 byte(s) (76.7% of input)
+Compressed 'LICENSE' to 'LICENSE.huf'
+  Characters:        1,081
+  Uncompressed size: 1,081 bytes
+  Compressed size:   829 bytes (metadata: 4, tree: 131, text: 694)
+  Compression ratio: 1.30
 ```
 
 The exit code is `0` on success, `1` on errors (e.g. a missing or invalid file), and `2` on invalid arguments.
@@ -43,7 +42,7 @@ string text = "breathe, breathe in the air";
 string filename = "lyrics.huf";
 
 CompressionInfo info = HuffmanCompressor.Encode(text, filename);
-Console.WriteLine(info);
+Console.WriteLine(info); // Characters: 27, compressed size: 38 bytes (metadata: 4, tree: 23, text: 11)
 
 string decodedText = HuffmanCompressor.Decode(filename);
 Console.WriteLine(decodedText);

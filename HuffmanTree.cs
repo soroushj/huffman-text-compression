@@ -37,7 +37,7 @@ class HuffmanTree
     {
         if (text.Length == 0)
         {
-            throw new ArgumentException("Empty text.", nameof(text));
+            throw new ArgumentException("The text cannot be empty.", nameof(text));
         }
 
         int[] frequencies = new int[char.MaxValue + 1];

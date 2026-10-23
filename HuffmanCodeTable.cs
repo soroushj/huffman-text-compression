@@ -32,7 +32,7 @@ class HuffmanCodeTable
             // frequencies (which produce longer codes) cannot be compressed
             if (codeLength > HuffmanCode.MaxLength)
             {
-                throw new NotSupportedException("The text cannot be compressed: its character frequencies are too uneven, which would require Huffman codes longer than " + HuffmanCode.MaxLength + " bits.");
+                throw new NotSupportedException($"The text cannot be compressed because its character frequencies are too uneven (some Huffman codes would be longer than {HuffmanCode.MaxLength} bits).");
             }
 
             _codeTable[tree.Character] = new HuffmanCode(code, (byte)codeLength);
