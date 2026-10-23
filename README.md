@@ -1,5 +1,7 @@
 # Huffman Text Compression
 
+[![CI](https://github.com/soroushj/huffman-text-compression/actions/workflows/ci.yml/badge.svg)](https://github.com/soroushj/huffman-text-compression/actions/workflows/ci.yml)
+
 A C# library and command-line tool for text compression, storage, and retrieval using the Huffman code.
 
 I wrote this project for an undergraduate data structures course. It is not meant to be used as a real compression tool or library, and it has known limitations (see the code comments).
