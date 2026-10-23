@@ -2,6 +2,8 @@
 
 A C# library and command-line tool for text compression, storage, and retrieval using the Huffman code.
 
+I wrote this project for an undergraduate data structures course. It is not meant to be used as a real compression tool or library, and it has known limitations (see the code comments).
+
 ## Build and Run
 
 Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download) (Windows, macOS, or Linux). No other dependencies.
