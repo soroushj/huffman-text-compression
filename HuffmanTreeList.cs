@@ -1,8 +1,8 @@
 namespace HuffmanTextCompression;
 
-// Each node of this linked list keeps a HuffmanTree. The list is sorted by the frequency of the trees
-// (node.Tree.Frequency). In practice, the built-in PriorityQueue should be used instead; this list is
-// written from scratch for demonstration purposes.
+// The priority queue used by HuffmanTree.GenerateHuffmanTree: a linked list of trees, sorted by their frequency
+// (node.Tree.Frequency), so the least frequent tree is always at the top. In practice, the built-in PriorityQueue
+// should be used instead; this list is written from scratch for demonstration purposes.
 class HuffmanTreeList
 {
     private class ListNode

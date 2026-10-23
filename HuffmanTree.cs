@@ -2,6 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace HuffmanTextCompression;
 
+// A node of a Huffman tree, which is also the root of the subtree below it. A leaf holds a character; an internal node
+// always has two children. Frequency is the number of occurrences of the leaf's character, or the sum of the children's
+// frequencies for an internal node. Trees decoded from a file have no frequencies (Frequency is -1).
 class HuffmanTree
 {
     public char Character { get; set; }
@@ -29,10 +32,12 @@ class HuffmanTree
         Right = right;
     }
 
-    [MemberNotNullWhen(false, nameof(Left), nameof(Right))]
     // In a HuffmanTree, Right == null if and only if Left == null
+    [MemberNotNullWhen(false, nameof(Left), nameof(Right))]
     public bool IsLeaf => Left == null;
 
+    // Builds the Huffman tree of the text: starts with one leaf per distinct character, then repeatedly merges the two
+    // least frequent trees until only one tree is left
     public static HuffmanTree GenerateHuffmanTree(string text)
     {
         if (text.Length == 0)

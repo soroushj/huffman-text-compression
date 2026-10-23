@@ -2,15 +2,27 @@ using System.Text;
 
 namespace HuffmanTextCompression;
 
+// The public entry point: compresses a text to a file and decompresses it back. The file format is described in
+// README.md.
+//
+// Encoding works like this:
+// 1. HuffmanTree.GenerateHuffmanTree counts the character frequencies and builds the Huffman tree, using
+//    HuffmanTreeList as a priority queue.
+// 2. HuffmanCodeTable walks the tree to find the code of each character.
+// 3. The tree itself is stored in the file (see EncodeTree), followed by the code of each character of the text.
+//    Bits are packed most significant bit first, into 16-bit words that are then written as bytes.
+//
+// Decoding reads the tree back from the file (see DecodeTree), then walks it from the root, bit by bit, emitting a
+// character at each leaf. Characters are UTF-16 code units (C# chars), so there are at most 65,536 of them.
 static class HuffmanCompressor
 {
     public const int FileFormatVersion = 0;
 
-    // A tree has at most 65,536 leaves (17 bits each) and 65,535 internal nodes (1 bit each),
-    // so its encoding takes at most 147,456 bytes
+    // A tree has at most 65,536 leaves (17 bits each) and 65,535 internal nodes (1 bit each), so its encoding takes at
+    // most 147,456 bytes
     private const int MaxTreeLengthInBytes = 147456;
 
-    // Encodes `text` and writes it to `filename`; returns the compression info
+    // Encodes text and writes it to filename; returns the compression info
     public static CompressionInfo Encode(string text, string filename)
     {
         if (text.Length == 0)
@@ -29,6 +41,7 @@ static class HuffmanCompressor
 
         // 1.1. Encode the tree
 
+        // The tree takes 18 bits per leaf minus 1 bit (see EncodeTree), so 2 words per leaf are enough
         ushort[] treeBuffer = new ushort[codeTable.NumberOfCodes * 2];
         int treeBitPosition = 0;
 
@@ -47,6 +60,7 @@ static class HuffmanCompressor
 
         // 1.2. Encode the text
 
+        // Each code is at most 16 bits, so 1 word per character is enough
         ushort[] encodedTextBuffer = new ushort[text.Length];
         long encodedTextBitPosition = 0;
 
@@ -72,25 +86,27 @@ static class HuffmanCompressor
 
         // 2.1. Write the metadata
 
-        // The first 6 bits of the file are for FileFormatVersion,
-        // the next 18 bits for treeLengthInBytes,
-        // the next 4 bits for bitsOfLastByteOfTree,
-        // and the next 4 bits for bitsOfLastByteOfEncodedText
-        // (4 bytes for the metadata in total)
+        // The first 6 bits of the file are for FileFormatVersion, the next 18 bits for treeLengthInBytes, the next 4
+        // bits for bitsOfLastByteOfTree, and the next 4 bits for bitsOfLastByteOfEncodedText (4 bytes for the metadata
+        // in total)
         writer.Write((byte)((FileFormatVersion << 2) | (treeLengthInBytes >> 16)));
         writer.Write((byte)(treeLengthInBytes >> 8));
         writer.Write((byte)treeLengthInBytes);
         writer.Write((byte)((bitsOfLastByteOfTree << 4) | bitsOfLastByteOfEncodedText));
 
         // 2.2. Write the encoded tree
+
         WriteBuffer(writer, treeBuffer, treeBitPosition);
 
         // 2.3. Write the encoded text
+
         WriteBuffer(writer, encodedTextBuffer, encodedTextBitPosition);
 
         return new CompressionInfo(text.Length, 4, treeLengthInBytes, encodedTextLengthInBytes);
     }
 
+    // Stores the tree in pre-order: an internal node is a 0 bit followed by its left and right subtrees, and a leaf is
+    // a 1 bit followed by its 16-bit character
     private static void EncodeTree(HuffmanTree tree, ushort[] buffer, ref int bitPosition)
     {
         if (tree.IsLeaf)
@@ -99,7 +115,7 @@ static class HuffmanCompressor
             buffer[bitPosition / 16] |= (ushort)(0x8000 >> (bitPosition % 16));
             bitPosition++;
 
-            // Append the character code
+            // Append the character (16 bits)
             AppendCode(buffer, (ushort)tree.Character, ref bitPosition);
 
             return;
@@ -112,11 +128,11 @@ static class HuffmanCompressor
         EncodeTree(tree.Right, buffer, ref bitPosition);
     }
 
+    // Appends code.Code (code.Length bits) to the buffer, starting at bitPosition
     private static void AppendCode(ushort[] buffer, HuffmanCode code, ref long bitPosition)
     {
-        // Append code.Code (code.Length bits) to the buffer, starting at bitPosition
-
         int index = (int)(bitPosition / 16);
+        // The number of bits that don't fit in the current word and spill into the next one (if positive)
         int split = (int)(bitPosition % 16) - (16 - code.Length);
 
         if (split > 0)
@@ -137,10 +153,9 @@ static class HuffmanCompressor
         bitPosition += code.Length;
     }
 
+    // Appends the code (16 bits) to the buffer, starting at bitPosition
     private static void AppendCode(ushort[] buffer, ushort code, ref int bitPosition)
     {
-        // Append the code (16 bits) to the buffer, starting at bitPosition
-
         int index = bitPosition / 16;
         int split = bitPosition % 16;
 
@@ -158,6 +173,7 @@ static class HuffmanCompressor
         bitPosition += 16;
     }
 
+    // Writes the first bufferLengthInBits bits of the buffer as whole bytes (the last byte is padded with 0 bits)
     private static void WriteBuffer(BinaryWriter writer, ushort[] buffer, long bufferLengthInBits)
     {
         int fullWords = (int)(bufferLengthInBits / 16);
@@ -187,7 +203,7 @@ static class HuffmanCompressor
         }
     }
 
-    // Reads and decodes `filename`; returns the decoded text
+    // Reads and decodes filename; returns the decoded text
     public static string Decode(string filename)
     {
         byte[] buffer = File.ReadAllBytes(filename);
@@ -210,9 +226,8 @@ static class HuffmanCompressor
 
         if (buffer.Length < 8)
         {
-            // 4 bytes for the metadata,
-            // at least 3 bytes for the tree (a 1 bit and 16 bits for the character code),
-            // and at least 1 byte for the text
+            // 4 bytes for the metadata, at least 3 bytes for the tree (a 1 bit and a 16-bit character), and at least 1
+            // byte for the text
             throw InvalidFileException(filename);
         }
 
@@ -233,6 +248,7 @@ static class HuffmanCompressor
 
         try
         {
+            // The tree starts at byte 4 and ends after the first bitsOfLastByteOfTree bits of its last byte
             DecodeTree(tree, buffer, ref treeBitPosition, (3 + treeLengthInBytes) * 8 + bitsOfLastByteOfTree, 0);
         }
         catch (InvalidDataException e)
@@ -256,8 +272,8 @@ static class HuffmanCompressor
                 }
             }
 
-            // The length of the Huffman code is 1,
-            // so the number of characters equals the number of bits of the encoded text
+            // The length of the Huffman code is 1, so the number of characters equals the number of bits of the encoded
+            // text
             int numOfChars = (buffer.Length - treeLengthInBytes - 5) * 8 + bitsOfLastByteOfText;
 
             return new string(tree.Character, numOfChars);
@@ -321,6 +337,7 @@ static class HuffmanCompressor
         return new InvalidDataException($"File '{filename}' is corrupted or is not a valid compressed file.", innerException);
     }
 
+    // Rebuilds the tree stored by EncodeTree, starting at bitPosition and ending before endPosition
     private static void DecodeTree(HuffmanTree tree, byte[] buffer, ref int bitPosition, int endPosition, int depth)
     {
         if (depth > HuffmanCode.MaxLength)
@@ -358,10 +375,9 @@ static class HuffmanCompressor
         DecodeTree(tree.Right, buffer, ref bitPosition, endPosition, depth + 1);
     }
 
+    // Reads the character stored in 16 bits, starting at bitPosition
     private static char ReadChar(byte[] buffer, int bitPosition)
     {
-        // Read the character stored in 16 bits, starting at bitPosition
-
         int index = bitPosition / 8;
         int split = bitPosition % 8;
 

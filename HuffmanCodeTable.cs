@@ -2,6 +2,9 @@ using System.Text;
 
 namespace HuffmanTextCompression;
 
+// Maps each character to its Huffman code. The codes are found by walking the tree from the root to each leaf,
+// appending a 0 bit for each left branch and a 1 bit for each right branch. The table is indexed by the character
+// itself, for constant-time lookup while encoding.
 class HuffmanCodeTable
 {
     private readonly HuffmanCode[] _codeTable;
@@ -28,8 +31,8 @@ class HuffmanCodeTable
     {
         if (tree.IsLeaf)
         {
-            // Known limitation: codes are stored in 16 bits, so texts with very uneven character
-            // frequencies (which produce longer codes) cannot be compressed
+            // Known limitation: codes are stored in 16 bits, so texts with very uneven character frequencies (which
+            // produce longer codes) cannot be compressed
             if (codeLength > HuffmanCode.MaxLength)
             {
                 throw new NotSupportedException($"The text cannot be compressed because its character frequencies are too uneven (some Huffman codes would be longer than {HuffmanCode.MaxLength} bits).");
@@ -52,6 +55,7 @@ class HuffmanCodeTable
     }
 }
 
+// A Huffman code: the Length least significant bits of Code
 readonly record struct HuffmanCode(ushort Code, byte Length)
 {
     public const int MaxLength = 16;
