@@ -1,8 +1,13 @@
 namespace HuffmanTextCompression;
 
 // The priority queue used by HuffmanTree.Build: a linked list of trees, sorted by their frequency
-// (node.Tree.Frequency), so the least frequent tree is always at the top. In practice, the built-in PriorityQueue
-// should be used instead; this list is written from scratch for demonstration purposes.
+// (node.Tree.Frequency), so the least frequent tree is always at the top.
+//
+// It's written from scratch for demonstration purposes; in practice, the built-in PriorityQueue (a binary heap) should
+// be used instead. Adding a tree takes O(n) here (O(1) at either end of the list) versus O(log n) there, and removing
+// the top tree takes O(1) versus O(log n). However, unlike this list, PriorityQueue doesn't guarantee the order of
+// trees with equal frequencies, so the resulting (still valid) Huffman tree could differ, e.g. between .NET versions,
+// and identical texts would no longer be guaranteed to compress to identical files.
 class HuffmanTreeList
 {
     private class ListNode
