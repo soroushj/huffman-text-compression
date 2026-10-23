@@ -58,7 +58,8 @@ catch (EncoderFallbackException)
     Console.Error.WriteLine("Error: The compressed data is invalid or corrupted.");
     return 1;
 }
-catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException)
+catch (Exception e)
+    when (e is IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException)
 {
     Console.Error.WriteLine($"Error: {e.Message}");
     return 1;

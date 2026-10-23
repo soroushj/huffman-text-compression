@@ -16,7 +16,7 @@ namespace HuffmanTextCompression;
 // character at each leaf. Characters are UTF-16 code units (C# chars), so there are at most 65,536 of them.
 public static class HuffmanCompressor
 {
-    public const int FileFormatVersion = 0;
+    private const int FileFormatVersion = 0;
 
     // The metadata consists of FileFormatVersion (6 bits), the tree size (18 bits), bitsOfLastByteOfTree (4 bits), and
     // bitsOfLastByteOfText (4 bits), in this order
@@ -253,7 +253,10 @@ public static class HuffmanCompressor
         int bitsOfLastByteOfTree = buffer[3] >> 4;
         int bitsOfLastByteOfText = buffer[3] & 0x0F;
 
-        if (bitsOfLastByteOfTree < 1 || bitsOfLastByteOfTree > 8 || bitsOfLastByteOfText < 1 || bitsOfLastByteOfText > 8 || treeSize < MinTreeSize || treeSize > MaxTreeSize || buffer.Length < MetadataSize + treeSize + MinTextSize)
+        if (bitsOfLastByteOfTree is < 1 or > 8
+            || bitsOfLastByteOfText is < 1 or > 8
+            || treeSize is < MinTreeSize or > MaxTreeSize
+            || buffer.Length < MetadataSize + treeSize + MinTextSize)
         {
             throw InvalidCompressedDataException();
         }
@@ -297,7 +300,8 @@ public static class HuffmanCompressor
 
             string singleCharText = new(tree.Character, charCount);
             output.Write(singleCharText);
-            return new CompressionInfo(singleCharText.Length, Encoding.UTF8.GetByteCount(singleCharText), MetadataSize, treeSize, buffer.Length - textStart);
+            return new CompressionInfo(singleCharText.Length, Encoding.UTF8.GetByteCount(singleCharText), MetadataSize,
+                treeSize, buffer.Length - textStart);
         }
 
         // The whole text is collected first, to compute its UTF-8 size
@@ -354,7 +358,8 @@ public static class HuffmanCompressor
 
         string text = decodedText.ToString();
         output.Write(text);
-        return new CompressionInfo(text.Length, Encoding.UTF8.GetByteCount(text), MetadataSize, treeSize, buffer.Length - textStart);
+        return new CompressionInfo(text.Length, Encoding.UTF8.GetByteCount(text), MetadataSize, treeSize,
+            buffer.Length - textStart);
     }
 
     private static InvalidDataException InvalidCompressedDataException(Exception? innerException = null)
@@ -411,13 +416,15 @@ public static class HuffmanCompressor
             return (char)((buffer[index] << 8) | buffer[index + 1]);
         }
 
-        return (char)((buffer[index] << (8 + split)) | (buffer[index + 1] << split) | (buffer[index + 2] >> (8 - split)));
+        return (char)((buffer[index] << (8 + split)) | (buffer[index + 1] << split)
+            | (buffer[index + 2] >> (8 - split)));
     }
 }
 
 // All sizes are in bytes. UncompressedSize is the size of the text in UTF-8 (without BOM), which is the baseline for
 // CompressionRatio.
-public readonly record struct CompressionInfo(int CharCount, int UncompressedSize, int MetadataSize, int EncodedTreeSize, int EncodedTextSize)
+public readonly record struct CompressionInfo(
+    int CharCount, int UncompressedSize, int MetadataSize, int EncodedTreeSize, int EncodedTextSize)
 {
     public int CompressedSize => MetadataSize + EncodedTreeSize + EncodedTextSize;
 
@@ -431,7 +438,8 @@ public readonly record struct CompressionInfo(int CharCount, int UncompressedSiz
         return string.Join(Environment.NewLine,
             $"Characters:        {CharCount:n0}",
             $"Uncompressed size: {FormatSize(UncompressedSize)}",
-            $"Compressed size:   {FormatSize(CompressedSize)} (metadata: {MetadataSize:n0}, tree: {EncodedTreeSize:n0}, text: {EncodedTextSize:n0})",
+            $"Compressed size:   {FormatSize(CompressedSize)} "
+                + $"(metadata: {MetadataSize:n0}, tree: {EncodedTreeSize:n0}, text: {EncodedTextSize:n0})",
             $"Compression ratio: {ratio}");
     }
 

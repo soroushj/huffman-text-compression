@@ -36,8 +36,14 @@ public class RoundTripTests
     {
         { "ASCII", RandomText(1, 10_000, random => (char)random.Next(' ', '~' + 1)) },
         { "all 16-bit chars", RandomText(2, 10_000, random => (char)random.Next(char.MaxValue + 1)) },
-        { "emoji (surrogate pairs)", string.Concat(Enumerable.Range(0, 1_000).Select(i => char.ConvertFromUtf32(0x1F600 + i % 80))) },
-        { "skewed frequencies", RandomText(3, 10_000, random => (char)('a' + Math.Min(25, (int)-Math.Log2(1 - random.NextDouble())))) },
+        {
+            "emoji (surrogate pairs)",
+            string.Concat(Enumerable.Range(0, 1_000).Select(i => char.ConvertFromUtf32(0x1F600 + i % 80)))
+        },
+        {
+            "skewed frequencies",
+            RandomText(3, 10_000, random => (char)('a' + Math.Min(25, (int)-Math.Log2(1 - random.NextDouble()))))
+        },
         { "two distinct chars", RandomText(4, 10_000, random => random.Next(10) == 0 ? 'b' : 'a') },
         { "long (3M chars)", RandomText(5, 3_000_000, random => (char)random.Next('a', 'z' + 1)) },
     };
