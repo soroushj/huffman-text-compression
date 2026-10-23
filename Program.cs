@@ -6,8 +6,8 @@ using HuffmanTextCompression;
 
 const string Usage = """
     Usage:
-      HuffmanTextCompression compress <input> <output>    Compress a UTF-8 text file
-      HuffmanTextCompression decompress <input> <output>  Decompress a compressed file
+      huff compress <input> <output>    Compress a UTF-8 text file
+      huff decompress <input> <output>  Decompress a compressed file
     """;
 
 if (args.Length != 3 || (args[0] != "compress" && args[0] != "decompress") || args[1] == "" || args[2] == "")

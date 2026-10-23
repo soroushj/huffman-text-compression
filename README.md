@@ -11,21 +11,21 @@ Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download) (Windows, macOS
 ```sh
 dotnet build                                   # build
 dotnet run -- compress input.txt output.huf    # build and run
-dotnet publish -c Release -o out               # publish to out/, then run out/HuffmanTextCompression
+dotnet publish -c Release -o out               # publish to out/, then run out/huff
 dotnet format                                  # format the source code
 ```
 
 ## CLI Usage
 
 ```
-HuffmanTextCompression compress <input> <output>    Compress a UTF-8 text file
-HuffmanTextCompression decompress <input> <output>  Decompress a compressed file
+huff compress <input> <output>    Compress a UTF-8 text file
+huff decompress <input> <output>  Decompress a compressed file
 ```
 
 Both commands print the sizes and the compression ratio (uncompressed size / compressed size):
 
 ```
-$ HuffmanTextCompression compress LICENSE LICENSE.huf
+$ huff compress LICENSE LICENSE.huf
 Compressed 'LICENSE' to 'LICENSE.huf'
   Characters:        1,081
   Uncompressed size: 1,081 bytes
