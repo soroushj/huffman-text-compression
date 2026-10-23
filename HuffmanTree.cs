@@ -4,20 +4,14 @@ namespace HuffmanTextCompression;
 
 class HuffmanTree
 {
-    public char Character;
-    public readonly int Frequency;
-    public HuffmanTree? Left;
-    public HuffmanTree? Right;
+    public char Character { get; set; }
+    public int Frequency { get; }
+    public HuffmanTree? Left { get; set; }
+    public HuffmanTree? Right { get; set; }
 
     public HuffmanTree()
     {
         Character = '\0';
-        Frequency = -1;
-    }
-
-    public HuffmanTree(char character)
-    {
-        Character = character;
         Frequency = -1;
     }
 
@@ -36,30 +30,26 @@ class HuffmanTree
     }
 
     [MemberNotNullWhen(false, nameof(Left), nameof(Right))]
-    public bool IsLeaf()
-    {
-        // In a HuffmanTree, Right == null if and only if Left == null
-        return Left == null;
-    }
+    // In a HuffmanTree, Right == null if and only if Left == null
+    public bool IsLeaf => Left == null;
 
     public static HuffmanTree GenerateHuffmanTree(string text)
     {
         if (text.Length == 0)
         {
-            throw new ArgumentException("Empty text.");
+            throw new ArgumentException("Empty text.", nameof(text));
         }
 
-        char[] chars = text.ToCharArray();
-        int[] frequencies = new int[0xFFFF + 1];
+        int[] frequencies = new int[char.MaxValue + 1];
 
-        for (int i = 0; i < chars.Length; i++)
+        foreach (char c in text)
         {
-            frequencies[chars[i]]++;
+            frequencies[c]++;
         }
 
         HuffmanTreeList list = new();
 
-        for (int i = 0; i <= 0xFFFF; i++)
+        for (int i = 0; i <= char.MaxValue; i++)
         {
             if (frequencies[i] != 0)
             {
@@ -69,12 +59,12 @@ class HuffmanTree
 
         while (!list.HasExactlyOneTree())
         {
-            HuffmanTree top1 = list.RemoveTopTree()!;
-            HuffmanTree top2 = list.RemoveTopTree()!;
+            HuffmanTree top1 = list.RemoveTopTree();
+            HuffmanTree top2 = list.RemoveTopTree();
 
             list.Add(new HuffmanTree(top1.Frequency + top2.Frequency, top1, top2));
         }
 
-        return list.RemoveTopTree()!;
+        return list.RemoveTopTree();
     }
 }

@@ -4,7 +4,11 @@ namespace HuffmanTextCompression;
 
 static class HuffmanCompressor
 {
-    public static readonly int FileFormatVersion = 0;
+    public const int FileFormatVersion = 0;
+
+    // A tree has at most 65,536 leaves (17 bits each) and 65,535 internal nodes (1 bit each),
+    // so its encoding takes at most 147,456 bytes
+    private const int MaxTreeLengthInBytes = 147456;
 
     // Encodes `text` and writes it to `filename`; returns the compression info
     public static CompressionInfo Encode(string text, string filename)
@@ -43,13 +47,12 @@ static class HuffmanCompressor
 
         // 1.2. Encode the text
 
-        char[] textCharArray = text.ToCharArray();
-        ushort[] encodedTextBuffer = new ushort[textCharArray.Length];
+        ushort[] encodedTextBuffer = new ushort[text.Length];
         long encodedTextBitPosition = 0;
 
-        for (int i = 0; i < textCharArray.Length; i++)
+        foreach (char c in text)
         {
-            AppendCode(encodedTextBuffer, codeTable.GetHuffmanCode(textCharArray[i]), ref encodedTextBitPosition);
+            AppendCode(encodedTextBuffer, codeTable.GetHuffmanCode(c), ref encodedTextBitPosition);
         }
 
         int encodedTextLengthInBytes = (int)(encodedTextBitPosition / 8);
@@ -90,7 +93,7 @@ static class HuffmanCompressor
 
     private static void EncodeTree(HuffmanTree tree, ushort[] buffer, ref int bitPosition)
     {
-        if (tree.IsLeaf())
+        if (tree.IsLeaf)
         {
             // Put a 1 bit
             buffer[bitPosition / 16] |= (ushort)(0x8000 >> (bitPosition % 16));
@@ -119,7 +122,7 @@ static class HuffmanCompressor
         if (split > 0)
         {
             buffer[index] |= (ushort)(code.Code >> split);
-            buffer[index + 1] = (ushort)(code.Code << 16 - split);
+            buffer[index + 1] = (ushort)(code.Code << (16 - split));
         }
         else if (split == 0)
         {
@@ -149,7 +152,7 @@ static class HuffmanCompressor
         {
             // split > 0
             buffer[index] |= (ushort)(code >> split);
-            buffer[index + 1] = (ushort)(code << 16 - split);
+            buffer[index + 1] = (ushort)(code << (16 - split));
         }
 
         bitPosition += 16;
@@ -157,10 +160,9 @@ static class HuffmanCompressor
 
     private static void WriteBuffer(BinaryWriter writer, ushort[] buffer, long bufferLengthInBits)
     {
-        int i;
-        int temp = (int)(bufferLengthInBits / 16);
+        int fullWords = (int)(bufferLengthInBits / 16);
 
-        for (i = 0; i < temp; i++)
+        for (int i = 0; i < fullWords; i++)
         {
             // 8 most significant bits
             writer.Write((byte)(buffer[i] >> 8));
@@ -168,20 +170,20 @@ static class HuffmanCompressor
             writer.Write((byte)buffer[i]);
         }
 
-        temp = (int)(bufferLengthInBits % 16);
+        int remainingBits = (int)(bufferLengthInBits % 16);
 
-        if (temp > 8)
+        if (remainingBits > 8)
         {
             // Last two bytes
             // 8 most significant bits
-            writer.Write((byte)(buffer[i] >> 8));
+            writer.Write((byte)(buffer[fullWords] >> 8));
             // 8 least significant bits
-            writer.Write((byte)buffer[i]);
+            writer.Write((byte)buffer[fullWords]);
         }
-        else if (temp > 0)
+        else if (remainingBits > 0)
         {
             // Last byte (8 most significant bits)
-            writer.Write((byte)(buffer[i] >> 8));
+            writer.Write((byte)(buffer[fullWords] >> 8));
         }
     }
 
@@ -203,7 +205,7 @@ static class HuffmanCompressor
 
         if (fileFormatVersion > FileFormatVersion)
         {
-            throw new FormatException("File '" + filename + "' has a newer format (file format version " + fileFormatVersion.ToString("00") + "), or is invalid or corrupted.");
+            throw new FormatException($"File '{filename}' has a newer format (file format version {fileFormatVersion:00}), or is invalid or corrupted.");
         }
 
         if (buffer.Length < 8)
@@ -211,16 +213,16 @@ static class HuffmanCompressor
             // 4 bytes for the metadata,
             // at least 3 bytes for the tree (a 1 bit and 16 bits for the character code),
             // and at least 1 byte for the text
-            throw new FormatException("File '" + filename + "' is invalid or corrupted.");
+            throw new FormatException($"File '{filename}' is invalid or corrupted.");
         }
 
         int treeLengthInBytes = ((buffer[0] & 0x03) << 16) | (buffer[1] << 8) | buffer[2];
         int bitsOfLastByteOfTree = buffer[3] >> 4;
         int bitsOfLastByteOfText = buffer[3] & 0x0F;
 
-        if (bitsOfLastByteOfTree < 1 || bitsOfLastByteOfTree > 8 || bitsOfLastByteOfText < 1 || bitsOfLastByteOfText > 8 || treeLengthInBytes < 3 || treeLengthInBytes > 147456 || buffer.Length < 5 + treeLengthInBytes)
+        if (bitsOfLastByteOfTree < 1 || bitsOfLastByteOfTree > 8 || bitsOfLastByteOfText < 1 || bitsOfLastByteOfText > 8 || treeLengthInBytes < 3 || treeLengthInBytes > MaxTreeLengthInBytes || buffer.Length < 5 + treeLengthInBytes)
         {
-            throw new FormatException("File '" + filename + "' is invalid or corrupted.");
+            throw new FormatException($"File '{filename}' is invalid or corrupted.");
         }
 
         // 2. Decode the tree
@@ -235,7 +237,7 @@ static class HuffmanCompressor
         }
         catch (FormatException)
         {
-            throw new FormatException("File '" + filename + "' is invalid or corrupted.");
+            throw new FormatException($"File '{filename}' is invalid or corrupted.");
         }
 
         // 3. Decode the text
@@ -243,14 +245,14 @@ static class HuffmanCompressor
         StringBuilder decodedText = new();
 
         // If the text consists entirely of a single character
-        if (tree.IsLeaf())
+        if (tree.IsLeaf)
         {
             for (int i = 4 + treeLengthInBytes; i < buffer.Length; i++)
             {
                 // The Huffman code for the only character must be 0
                 if (buffer[i] != 0)
                 {
-                    throw new FormatException("File '" + filename + "' is invalid or corrupted.");
+                    throw new FormatException($"File '{filename}' is invalid or corrupted.");
                 }
             }
 
@@ -278,12 +280,7 @@ static class HuffmanCompressor
                     currentNode = currentNode.Left;
                 }
 
-                if (currentNode == null)
-                {
-                    throw new FormatException("File '" + filename + "' is invalid or corrupted.");
-                }
-
-                if (currentNode.IsLeaf())
+                if (currentNode.IsLeaf)
                 {
                     // Reached a leaf; read a character
                     decodedText.Append(currentNode.Character);
@@ -307,12 +304,7 @@ static class HuffmanCompressor
                 currentNode = currentNode.Left;
             }
 
-            if (currentNode == null)
-            {
-                throw new FormatException("File '" + filename + "' is invalid or corrupted.");
-            }
-
-            if (currentNode.IsLeaf())
+            if (currentNode.IsLeaf)
             {
                 // Reached a leaf; read a character
                 decodedText.Append(currentNode.Character);
@@ -372,37 +364,24 @@ static class HuffmanCompressor
 
         if (split == 0)
         {
-            return (char)(((ushort)buffer[index] << 8) | buffer[index + 1]);
+            return (char)((buffer[index] << 8) | buffer[index + 1]);
         }
 
-        return (char)(((ushort)buffer[index] << 8 + split) | ((ushort)buffer[index + 1] << split) | (buffer[index + 2] >> 8 - split));
+        return (char)((buffer[index] << (8 + split)) | (buffer[index + 1] << split) | (buffer[index + 2] >> (8 - split)));
     }
 }
 
-readonly struct CompressionInfo
+readonly record struct CompressionInfo(int TotalChars, int MetadataSize, int TreeSize, int TextSize)
 {
-    public readonly int TotalChars;
-    public readonly int MetadataSize;
-    public readonly int TreeSize;
-    public readonly int TextSize;
-
-    public CompressionInfo(int totalChars, int metadataSize, int treeSize, int textSize)
-    {
-        TotalChars = totalChars;
-        MetadataSize = metadataSize;
-        TreeSize = treeSize;
-        TextSize = textSize;
-    }
-
     public override string ToString()
     {
         long compressedFileSize = MetadataSize + TreeSize + TextSize;
 
-        return
-          TotalChars.ToString("n0") + " char(s) total" + Environment.NewLine +
-          compressedFileSize.ToString("n0") + " byte(s) total" + Environment.NewLine +
-          MetadataSize.ToString("n0") + " byte(s) for metadata" + Environment.NewLine +
-          TreeSize.ToString("n0") + " byte(s) for tree" + Environment.NewLine +
-          TextSize.ToString("n0") + " byte(s) for text";
+        return string.Join(Environment.NewLine,
+            $"{TotalChars:n0} char(s) total",
+            $"{compressedFileSize:n0} byte(s) total",
+            $"{MetadataSize:n0} byte(s) for metadata",
+            $"{TreeSize:n0} byte(s) for tree",
+            $"{TextSize:n0} byte(s) for text");
     }
 }
