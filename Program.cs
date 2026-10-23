@@ -23,29 +23,33 @@ try
 {
     if (args[0] == "compress")
     {
-        string text = File.ReadAllText(input);
-
         // Compress to memory first, so no output file is created if compression fails
         using MemoryStream compressed = new();
-        CompressionInfo info = HuffmanCompressor.Encode(text, compressed);
+        CompressionInfo info;
+        using (StreamReader text = File.OpenText(input))
+        {
+            info = HuffmanCompressor.Encode(text, compressed);
+        }
+
         File.WriteAllBytes(output, compressed.ToArray());
 
         Console.WriteLine($"Compressed '{input}' to '{output}'");
-        PrintSizes(info.TotalChars, new FileInfo(input).Length, info.CompressedSize,
-            $" (metadata: {info.MetadataSize:n0}, tree: {info.EncodedTreeSize:n0}, text: {info.EncodedTextSize:n0})");
+        Console.WriteLine(info);
     }
     else
     {
-        string text;
+        // Decompress to memory first, so no output file is created if decompression fails
+        using StringWriter text = new();
+        CompressionInfo info;
         using (FileStream compressed = File.OpenRead(input))
         {
-            text = HuffmanCompressor.Decode(compressed);
+            info = HuffmanCompressor.Decode(compressed, text);
         }
 
-        File.WriteAllText(output, text);
+        File.WriteAllText(output, text.ToString());
 
         Console.WriteLine($"Decompressed '{input}' to '{output}'");
-        PrintSizes(text.Length, new FileInfo(output).Length, new FileInfo(input).Length);
+        Console.WriteLine(info);
     }
 }
 catch (EncoderFallbackException)
@@ -61,18 +65,3 @@ catch (Exception e) when (e is IOException or UnauthorizedAccessException or Inv
 }
 
 return 0;
-
-static void PrintSizes(int characters, long uncompressedSize, long compressedSize, string compressedSizeDetails = "")
-{
-    string ratio = compressedSize == 0 ? "n/a" : $"{(double)uncompressedSize / compressedSize:0.00}";
-
-    Console.WriteLine($"  Characters:        {characters:n0}");
-    Console.WriteLine($"  Uncompressed size: {FormatBytes(uncompressedSize)}");
-    Console.WriteLine($"  Compressed size:   {FormatBytes(compressedSize)}{compressedSizeDetails}");
-    Console.WriteLine($"  Compression ratio: {ratio}");
-}
-
-static string FormatBytes(long bytes)
-{
-    return bytes == 1 ? "1 byte" : $"{bytes:n0} bytes";
-}
