@@ -9,10 +9,10 @@ I wrote this project for an undergraduate data structures course. It is not mean
 Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download) (Windows, macOS, or Linux). No other dependencies.
 
 ```sh
-dotnet build                                   # build
-dotnet run -- compress input.txt output.huf    # build and run
-dotnet publish -c Release -o out               # publish to out/, then run out/huff
-dotnet format                                  # format the source code
+dotnet build                                 # build
+dotnet run -- compress LICENSE LICENSE.huff  # build and run
+dotnet publish -c Release -o out             # publish to out/, then run out/huff
+dotnet format                                # format the source code
 ```
 
 ## CLI Usage
@@ -25,11 +25,18 @@ huff decompress <input> <output>  Decompress a compressed file
 Both commands print the sizes and the compression ratio (uncompressed size / compressed size):
 
 ```
-$ huff compress LICENSE LICENSE.huf
-Compressed 'LICENSE' to 'LICENSE.huf'
+$ huff compress LICENSE LICENSE.huff
+Compressed 'LICENSE' to 'LICENSE.huff'
   Characters:        1,081
   Uncompressed size: 1,081 bytes
   Compressed size:   829 bytes (metadata: 4, tree: 131, text: 694)
+  Compression ratio: 1.30
+
+$ huff decompress LICENSE.huff LICENSE.copy
+Decompressed 'LICENSE.huff' to 'LICENSE.copy'
+  Characters:        1,081
+  Uncompressed size: 1,081 bytes
+  Compressed size:   829 bytes
   Compression ratio: 1.30
 ```
 
@@ -42,16 +49,16 @@ The exit code is `0` on success, `1` on errors (e.g. a missing or invalid file),
 ```csharp
 string text = "breathe, breathe in the air";
 
-using (FileStream file = File.Create("lyrics.huf"))
+using (FileStream file = File.Create("breathe.huff"))
 {
     CompressionInfo info = HuffmanCompressor.Encode(text, file);
     Console.WriteLine(info); // Characters: 27, compressed size: 38 bytes (metadata: 4, tree: 23, text: 11)
 }
 
-using (FileStream file = File.OpenRead("lyrics.huf"))
+using (FileStream file = File.OpenRead("breathe.huff"))
 {
     string decodedText = HuffmanCompressor.Decode(file);
-    Console.WriteLine(decodedText);
+    Console.WriteLine(decodedText == text); // True
 }
 ```
 
