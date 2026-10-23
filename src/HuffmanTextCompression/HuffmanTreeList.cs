@@ -7,7 +7,7 @@ namespace HuffmanTextCompression;
 // be used instead. Adding a tree takes O(n) here (O(1) at either end of the list) versus O(log n) there, and removing
 // the top tree takes O(1) versus O(log n). However, unlike this list, PriorityQueue doesn't guarantee the order of
 // trees with equal frequencies, so the resulting (still valid) Huffman tree could differ, e.g. between .NET versions,
-// and identical texts would no longer be guaranteed to compress to identical files.
+// and identical texts would no longer be guaranteed to compress to identical files (which FileFormatTests relies on).
 class HuffmanTreeList
 {
     private class ListNode
