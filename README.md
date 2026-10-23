@@ -37,15 +37,22 @@ The exit code is `0` on success, `1` on errors (e.g. a missing or invalid file),
 
 ## API Usage
 
+`Encode` writes the compressed data to a `Stream` and `Decode` reads it back from one. Any stream works (e.g. a `FileStream` or a `MemoryStream`), and neither method closes it.
+
 ```csharp
 string text = "breathe, breathe in the air";
-string filename = "lyrics.huf";
 
-CompressionInfo info = HuffmanCompressor.Encode(text, filename);
-Console.WriteLine(info); // Characters: 27, compressed size: 38 bytes (metadata: 4, tree: 23, text: 11)
+using (FileStream file = File.Create("lyrics.huf"))
+{
+    CompressionInfo info = HuffmanCompressor.Encode(text, file);
+    Console.WriteLine(info); // Characters: 27, compressed size: 38 bytes (metadata: 4, tree: 23, text: 11)
+}
 
-string decodedText = HuffmanCompressor.Decode(filename);
-Console.WriteLine(decodedText);
+using (FileStream file = File.OpenRead("lyrics.huf"))
+{
+    string decodedText = HuffmanCompressor.Decode(file);
+    Console.WriteLine(decodedText);
+}
 ```
 
 ## File Format

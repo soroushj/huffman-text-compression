@@ -2,7 +2,7 @@ using System.Text;
 
 namespace HuffmanTextCompression;
 
-// The public entry point: compresses a text to a file and decompresses it back. The file format is described in
+// The public entry point: compresses a text to a stream and decompresses it back. The file format is described in
 // README.md.
 //
 // Encoding works like this:
@@ -22,13 +22,12 @@ static class HuffmanCompressor
     // most 147,456 bytes
     private const int MaxTreeLengthInBytes = 147456;
 
-    // Encodes text and writes it to filename; returns the compression info
-    public static CompressionInfo Encode(string text, string filename)
+    // Encodes text and writes it to output (without closing it); returns the compression info
+    public static CompressionInfo Encode(string text, Stream output)
     {
         if (text.Length == 0)
         {
-            // Create an empty file
-            File.WriteAllBytes(filename, []);
+            // An empty text is encoded as no data at all
             return new CompressionInfo(0, 0, 0, 0);
         }
 
@@ -82,7 +81,7 @@ static class HuffmanCompressor
 
         // 2. Write
 
-        using BinaryWriter writer = new(File.Open(filename, FileMode.Create));
+        using BinaryWriter writer = new(output, Encoding.UTF8, leaveOpen: true);
 
         // 2.1. Write the metadata
 
@@ -203,14 +202,16 @@ static class HuffmanCompressor
         }
     }
 
-    // Reads and decodes filename; returns the decoded text
-    public static string Decode(string filename)
+    // Reads input to the end (without closing it) and decodes it; returns the decoded text
+    public static string Decode(Stream input)
     {
-        byte[] buffer = File.ReadAllBytes(filename);
+        using MemoryStream memory = new();
+        input.CopyTo(memory);
+        byte[] buffer = memory.ToArray();
 
         if (buffer.Length == 0)
         {
-            // Empty file
+            // Empty text
             return "";
         }
 
@@ -221,14 +222,14 @@ static class HuffmanCompressor
 
         if (fileFormatVersion > FileFormatVersion)
         {
-            throw new InvalidDataException($"File '{filename}' has an unsupported format version ({fileFormatVersion}); it may have been created by a newer version of this program, or it may be corrupted.");
+            throw new InvalidDataException($"The compressed data has an unsupported format version ({fileFormatVersion}); it may have been created by a newer version of this program, or it may be corrupted.");
         }
 
         if (buffer.Length < 8)
         {
             // 4 bytes for the metadata, at least 3 bytes for the tree (a 1 bit and a 16-bit character), and at least 1
             // byte for the text
-            throw InvalidFileException(filename);
+            throw InvalidCompressedDataException();
         }
 
         int treeLengthInBytes = ((buffer[0] & 0x03) << 16) | (buffer[1] << 8) | buffer[2];
@@ -237,7 +238,7 @@ static class HuffmanCompressor
 
         if (bitsOfLastByteOfTree < 1 || bitsOfLastByteOfTree > 8 || bitsOfLastByteOfText < 1 || bitsOfLastByteOfText > 8 || treeLengthInBytes < 3 || treeLengthInBytes > MaxTreeLengthInBytes || buffer.Length < 5 + treeLengthInBytes)
         {
-            throw InvalidFileException(filename);
+            throw InvalidCompressedDataException();
         }
 
         // 2. Decode the tree
@@ -253,7 +254,7 @@ static class HuffmanCompressor
         }
         catch (InvalidDataException e)
         {
-            throw InvalidFileException(filename, e);
+            throw InvalidCompressedDataException(e);
         }
 
         // 3. Decode the text
@@ -268,7 +269,7 @@ static class HuffmanCompressor
                 // The Huffman code for the only character must be 0
                 if (buffer[i] != 0)
                 {
-                    throw InvalidFileException(filename);
+                    throw InvalidCompressedDataException();
                 }
             }
 
@@ -332,9 +333,9 @@ static class HuffmanCompressor
         return decodedText.ToString();
     }
 
-    private static InvalidDataException InvalidFileException(string filename, Exception? innerException = null)
+    private static InvalidDataException InvalidCompressedDataException(Exception? innerException = null)
     {
-        return new InvalidDataException($"File '{filename}' is corrupted or is not a valid compressed file.", innerException);
+        return new InvalidDataException("The compressed data is invalid or corrupted.", innerException);
     }
 
     // Rebuilds the tree stored by EncodeTree, starting at bitPosition and ending before endPosition

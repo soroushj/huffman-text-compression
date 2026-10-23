@@ -24,7 +24,11 @@ try
     if (args[0] == "compress")
     {
         string text = File.ReadAllText(input);
-        CompressionInfo info = HuffmanCompressor.Encode(text, output);
+
+        // Compress to memory first, so no output file is created if compression fails
+        using MemoryStream compressed = new();
+        CompressionInfo info = HuffmanCompressor.Encode(text, compressed);
+        File.WriteAllBytes(output, compressed.ToArray());
 
         Console.WriteLine($"Compressed '{input}' to '{output}'");
         PrintSizes(info.TotalChars, new FileInfo(input).Length, info.CompressedSize,
@@ -32,7 +36,12 @@ try
     }
     else
     {
-        string text = HuffmanCompressor.Decode(input);
+        string text;
+        using (FileStream compressed = File.OpenRead(input))
+        {
+            text = HuffmanCompressor.Decode(compressed);
+        }
+
         File.WriteAllText(output, text);
 
         Console.WriteLine($"Decompressed '{input}' to '{output}'");
@@ -42,7 +51,7 @@ try
 catch (EncoderFallbackException)
 {
     // A corrupted file can decode to text that is not valid Unicode
-    Console.Error.WriteLine($"Error: File '{input}' is corrupted or is not a valid compressed file.");
+    Console.Error.WriteLine("Error: The compressed data is invalid or corrupted.");
     return 1;
 }
 catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException)
