@@ -4,7 +4,7 @@ using HuffmanTextCompression;
 // Known limitation: the input of compress is read as UTF-8 text and the output of decompress is written as UTF-8
 // without BOM, so a BOM or invalid UTF-8 bytes in the original text file are not preserved by a round-trip
 
-const string usage = """
+const string Usage = """
     Usage:
       HuffmanTextCompression compress <input> <output>    Compress a UTF-8 text file
       HuffmanTextCompression decompress <input> <output>  Decompress a compressed file
@@ -12,7 +12,7 @@ const string usage = """
 
 if (args.Length != 3 || (args[0] != "compress" && args[0] != "decompress") || args[1] == "" || args[2] == "")
 {
-    Console.Error.WriteLine(usage);
+    Console.Error.WriteLine(Usage);
     return 2;
 }
 
@@ -27,8 +27,8 @@ try
         CompressionInfo info = HuffmanCompressor.Encode(text, output);
 
         Console.WriteLine($"Compressed '{input}' to '{output}'");
-        PrintSizes(info.TotalChars, new FileInfo(input).Length, info.TotalSize,
-            $" (metadata: {info.MetadataSize:n0}, tree: {info.TreeSize:n0}, text: {info.TextSize:n0})");
+        PrintSizes(info.TotalChars, new FileInfo(input).Length, info.CompressedSize,
+            $" (metadata: {info.MetadataSize:n0}, tree: {info.EncodedTreeSize:n0}, text: {info.EncodedTextSize:n0})");
     }
     else
     {

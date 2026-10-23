@@ -9,7 +9,7 @@ class HuffmanCodeTable
 {
     private readonly HuffmanCode[] _codeTable;
 
-    public int NumberOfCodes { get; private set; }
+    public int Count { get; private set; }
 
     public HuffmanCodeTable(HuffmanTree tree)
     {
@@ -20,14 +20,15 @@ class HuffmanCodeTable
         {
             // Use code 0 for the character
             _codeTable[tree.Character] = new HuffmanCode(0, 1);
-            NumberOfCodes = 1;
+            Count = 1;
             return;
         }
 
-        GetAllHuffmanCodes(tree, 0, 0);
+        AddCodes(tree, 0, 0);
     }
 
-    private void GetAllHuffmanCodes(HuffmanTree tree, ushort code, int codeLength)
+    // Adds the codes of all leaves under tree; code (codeLength bits) is the path from the root to tree
+    private void AddCodes(HuffmanTree tree, ushort code, int codeLength)
     {
         if (tree.IsLeaf)
         {
@@ -39,17 +40,17 @@ class HuffmanCodeTable
             }
 
             _codeTable[tree.Character] = new HuffmanCode(code, (byte)codeLength);
-            NumberOfCodes++;
+            Count++;
             return;
         }
 
         // Put a 0 bit and go left
-        GetAllHuffmanCodes(tree.Left, (ushort)(code << 1), codeLength + 1);
+        AddCodes(tree.Left, (ushort)(code << 1), codeLength + 1);
         // Put a 1 bit and go right
-        GetAllHuffmanCodes(tree.Right, (ushort)((code << 1) | 1), codeLength + 1);
+        AddCodes(tree.Right, (ushort)((code << 1) | 1), codeLength + 1);
     }
 
-    public HuffmanCode GetHuffmanCode(char character)
+    public HuffmanCode GetCode(char character)
     {
         return _codeTable[character];
     }

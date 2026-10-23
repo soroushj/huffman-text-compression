@@ -38,7 +38,7 @@ class HuffmanTree
 
     // Builds the Huffman tree of the text: starts with one leaf per distinct character, then repeatedly merges the two
     // least frequent trees until only one tree is left
-    public static HuffmanTree GenerateHuffmanTree(string text)
+    public static HuffmanTree Build(string text)
     {
         if (text.Length == 0)
         {
