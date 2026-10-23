@@ -9,11 +9,10 @@ static class HuffmanCompressor
     // encodes `text` and writes to `filename`, returns compression info
     public static CompressionInfo Encode(string text, string filename)
     {
-        using BinaryWriter writer = new(File.Open(filename, FileMode.Create));
-
         if (text.Length == 0)
         {
             // create an empty file
+            File.WriteAllBytes(filename, []);
             return new CompressionInfo(0, 0, 0, 0);
         }
 
@@ -65,6 +64,8 @@ static class HuffmanCompressor
         }
 
         // 2. write
+
+        using BinaryWriter writer = new(File.Open(filename, FileMode.Create));
 
         // 2.1. write the metadata
 
@@ -231,7 +232,7 @@ static class HuffmanCompressor
 
         try
         {
-            DecodeTree(tree, buffer, ref treeBitPosition, (3 + treeLengthInBytes) * 8 + bitsOfLastByteOfTree);
+            DecodeTree(tree, buffer, ref treeBitPosition, (3 + treeLengthInBytes) * 8 + bitsOfLastByteOfTree, 0);
         }
         catch (FormatException)
         {
@@ -324,14 +325,18 @@ static class HuffmanCompressor
         return decodedText.ToString();
     }
 
-    private static void DecodeTree(HuffmanTree tree, byte[] buffer, ref int bitPosition, int endPosition)
+    private static void DecodeTree(HuffmanTree tree, byte[] buffer, ref int bitPosition, int endPosition, int depth)
     {
+        if (depth > HuffmanCode.MaxLength)
+        {
+            // the encoder never produces such a deep tree, so the file is invalid or corrupted
+            throw new FormatException();
+        }
+
         // if the bit at bitPosition is 1
         if ((buffer[bitPosition / 8] & (byte)(0x80 >> (bitPosition % 8))) != 0)
         {
-            // read the character stored in 16 bits next to the bit at bitPosition
-            tree.Character = ReadChar(buffer, ++bitPosition);
-            bitPosition += 16;
+            bitPosition += 17;
 
             if (bitPosition > endPosition)
             {
@@ -339,6 +344,8 @@ static class HuffmanCompressor
                 throw new FormatException();
             }
 
+            // read the character stored in 16 bits next to the 1 bit
+            tree.Character = ReadChar(buffer, bitPosition - 16);
             return;
         }
 
@@ -351,10 +358,10 @@ static class HuffmanCompressor
         }
 
         tree.Left = new HuffmanTree();
-        DecodeTree(tree.Left, buffer, ref bitPosition, endPosition);
+        DecodeTree(tree.Left, buffer, ref bitPosition, endPosition, depth + 1);
 
         tree.Right = new HuffmanTree();
-        DecodeTree(tree.Right, buffer, ref bitPosition, endPosition);
+        DecodeTree(tree.Right, buffer, ref bitPosition, endPosition, depth + 1);
     }
 
     private static char ReadChar(byte[] buffer, int bitPosition)

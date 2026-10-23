@@ -1,3 +1,4 @@
+using System.Text;
 using HuffmanTextCompression;
 
 const string usage = """
@@ -36,7 +37,13 @@ try
         Console.WriteLine($"{new FileInfo(input).Length:n0} -> {new FileInfo(output).Length:n0} byte(s)");
     }
 }
-catch (Exception e) when (e is IOException or UnauthorizedAccessException or FormatException)
+catch (EncoderFallbackException)
+{
+    // a corrupted file can decode to text that is not valid Unicode
+    Console.Error.WriteLine($"Error: File '{input}' is invalid or corrupted.");
+    return 1;
+}
+catch (Exception e) when (e is IOException or UnauthorizedAccessException or FormatException or NotSupportedException)
 {
     Console.Error.WriteLine($"Error: {e.Message}");
     return 1;
