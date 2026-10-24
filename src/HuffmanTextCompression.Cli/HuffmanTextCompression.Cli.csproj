@@ -3,6 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>huff</AssemblyName>
+    <!-- No dependency on the ICU library (missing on some Linux systems); numbers are always formatted like 1,081 -->
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <ItemGroup>

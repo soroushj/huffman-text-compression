@@ -6,9 +6,13 @@ A C# library and command-line tool for text compression, storage, and retrieval 
 
 I wrote this project for an undergraduate data structures course. It is not meant to be used as a real compression tool or library, and it has known limitations (see the code comments).
 
+## Download
+
+Standalone `huff` binaries for Linux, macOS, and Windows (x64 and ARM64) are available on the [Releases](https://github.com/soroushj/huffman-text-compression/releases) page. They include the .NET runtime, so nothing else needs to be installed. On macOS, you may need to allow the downloaded binary to run with `xattr -d com.apple.quarantine huff`.
+
 ## Build and Run
 
-Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download) (Windows, macOS, or Linux).
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download) (Linux, macOS, or Windows).
 
 The library is in `src/HuffmanTextCompression`, the CLI in `src/HuffmanTextCompression.Cli`, and the tests in `tests/HuffmanTextCompression.Tests`. From the repository root:
 

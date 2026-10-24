@@ -1,0 +1,78 @@
+name: Release
+
+# Pushing a version tag (e.g. v0.0.1) builds standalone huff binaries (including the .NET runtime) and publishes them as
+# a GitHub release
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - run: dotnet test
+
+  build:
+    needs: test
+    strategy:
+      matrix:
+        include:
+          - { rid: linux-x64, os: ubuntu-latest }
+          - { rid: linux-arm64, os: ubuntu-latest }
+          - { rid: win-x64, os: ubuntu-latest }
+          - { rid: win-arm64, os: ubuntu-latest }
+          # macOS binaries must be built on macOS to be signed (Apple Silicon doesn't run unsigned binaries)
+          - { rid: osx-x64, os: macos-latest }
+          - { rid: osx-arm64, os: macos-latest }
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish
+        run: >
+          dotnet publish src/HuffmanTextCompression.Cli -c Release -r ${{ matrix.rid }} -o publish
+          --self-contained -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=none
+          -p:Version=${GITHUB_REF_NAME#v}
+
+      - name: Package
+        run: |
+          name="huff-$GITHUB_REF_NAME-${{ matrix.rid }}"
+          cp LICENSE README.md publish/
+          if [[ "${{ matrix.rid }}" == win-* ]]; then
+            (cd publish && zip -r "../$name.zip" .)
+          else
+            tar -czf "$name.tar.gz" -C publish .
+          fi
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.rid }}
+          path: huff-*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          merge-multiple: true
+
+      - run: gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --generate-notes huff-*
+        env:
+          GH_TOKEN: ${{ github.token }}
